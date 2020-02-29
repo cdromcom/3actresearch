@@ -1,0 +1,102 @@
+---
+title: "study2-analyses"
+output: html_notebook
+---
+
+###
+Source1: https://www.datanovia.com/en/lessons/friedman-test-in-r/
+Source2: https://rdrr.io/cran/rstatix/man/friedman_effsize.html
+
+
+```{r}
+
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+
+```
+
+```{r}
+
+library(readxl)
+
+studytwo <- read_excel("C:/Users/Purav Patel/Dropbox/Sabbatical 2019-20/Auditing/Human Factors/Noise Research Presentation/Data & Analyses/Data/study-2-summary-ratings.xlsx")
+
+
+head(studytwo)
+
+```
+
+
+```{r}
+
+studytwoNew <- studytwo %>%
+  gather(key = "soundType", value = "rating", notAnnoying, engine, hum, horn, noNoise, exhaust, driverSelects, whiteNoise, musicAny, musicClassical, beep, click, whistle, siren) %>%
+  convert_as_factor(id, soundType)
+
+head(studytwoNew)
+tail(studytwoNew)
+
+View(studytwoNew)  
+
+```
+
+
+```{r}
+
+studytwoNew %>%
+  group_by(soundType) %>%
+  get_summary_stats(rating, type = "common")
+
+```
+```{r}
+
+ggboxplot(studytwoNew, x = "soundType", y = "rating", add = "jitter")
+
+```
+
+
+```{r}
+
+shapiro_test(studytwoNew, rating)
+
+```
+
+
+```{r}
+
+res.fried <- studytwoNew %>% friedman_test(rating ~ soundType |id)
+
+res.fried
+
+```
+
+```{r}
+
+studytwoNew %>% friedman_effsize(rating ~ soundType |id, ci = TRUE, conf.level = 0.99, ci.type = "perc", nboot = 1000)
+
+```
+
+```{r}
+
+pwc <- studytwoNew %>%
+  wilcox_test(rating ~ soundType, paired = TRUE, p.adjust.method = "bonferroni")
+
+pwc
+
+```
+
+
+```{r}
+
+pwc <- pwc %>% add_xy_position(x = "time")
+ggboxplot(studytwoNew, x = "soundType", y = "rating", add = "point") +
+  stat_pvalue_manual(pwc, hide.ns = TRUE) +
+  labs(
+    subtitle = get_test_label(res.fried, detailed = TRUE),
+    caption = get_pwc_label(pwc)
+  )
+
+```
+
+
