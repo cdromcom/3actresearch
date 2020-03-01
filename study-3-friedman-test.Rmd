@@ -20,9 +20,12 @@ library(rstatix)
 
 library(readxl)
 
+
 s3 <- read_excel("C:/Users/Purav Patel/Dropbox/Sabbatical 2019-20/Auditing/Human Factors/Noise Research Presentation/Data & Analyses/Data/study-3-summary-ratings-edited.xlsx")
 
+
 head(s3)
+
 
 ```
 
@@ -72,7 +75,7 @@ res.fried
 
 ```{r}
 
-studythree %>% friedman_effsize(rating ~ soundType |id, ci = TRUE, conf.level = 0.99, ci.type = "perc", nboot = 10000)
+studythree %>% friedman_effsize(rating ~ soundType |id, ci = TRUE, conf.level = 0.99, ci.type = "perc", nboot = 1000)
 
 ```
 
@@ -95,6 +98,23 @@ ggboxplot(studythree, x = "soundType", y = "rating", add = "point") +
     subtitle = get_test_label(res.fried,  detailed = TRUE),
     caption = get_pwc_label(pwc)
   )
+
+
+```
+
+```{r}
+
+# Type S and Type M Error Analysis
+
+library(retrodesign)
+
+retro_design(c(.20,.40,.60,.80, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0),0.15)
+
+```
+
+```{r}
+
+retro_design(c(.20,.30,.40,.50, 6.0),0.20)
 
 
 ```
